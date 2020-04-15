@@ -2,17 +2,24 @@ const admin = require("firebase-admin");
 const fs = require('fs');
 const serviceAccount = require("../others/serviceAccountKey.json");
 
-const dataLoc = '../data/20200415'
+const version = 1.2
+
+const dataLoc = '../data/20200415_with_data'
 if (!fs.existsSync(dataLoc)){
     fs.mkdirSync(dataLoc);
 }
+
+const pullDataScript = `${dataLoc}/pull_data.sh`
+const pDS = fs.createWriteStream(pullDataScript, {
+    flags: 'w'
+})
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://project-coswara.firebaseio.com"
 })
 
-admin.firestore().collection('USERS').where('cS', '==', 'done').where('lUV', '==', 1.2).get().then(function userFilter(snapshot) {
+admin.firestore().collection('USERS').where('cS', '==', 'done').where('lUV', '==', version).get().then(function userFilter(snapshot) {
     console.log(`Fetched ${snapshot.size} users`)
     snapshot.forEach((doc) => {
         let userDataLoc = `${dataLoc}/${doc.id}`
@@ -37,5 +44,7 @@ admin.firestore().collection('USERS').where('cS', '==', 'done').where('lUV', '==
             })
             fs.writeFileSync(metaDataJSON, JSON.stringify(metaData));
         })
+        pDS.write(`gsutil -m cp -R gs://project-coswara.appspot.com/AUDIO_DATA/${doc.id} ${dataLoc}\n`)
     })
 })
+
