@@ -1,10 +1,11 @@
 const admin = require("firebase-admin");
 const fs = require('fs');
+const path = require("path");
 const serviceAccount = require("../others/serviceAccountKey.json");
 
 const version = 1.2
 
-const dataLoc = '../data/20200415_with_data'
+const dataLoc = path.resolve('../data/20200415')
 if (!fs.existsSync(dataLoc)){
     fs.mkdirSync(dataLoc);
 }
