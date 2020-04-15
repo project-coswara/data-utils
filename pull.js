@@ -1,13 +1,41 @@
 const admin = require("firebase-admin");
+const fs = require('fs');
 const serviceAccount = require("../others/serviceAccountKey.json");
+
+const dataLoc = '../data/20200415'
+if (!fs.existsSync(dataLoc)){
+    fs.mkdirSync(dataLoc);
+}
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://project-coswara.firebaseio.com"
 })
 
-admin.firestore().collection('USERS').where('cS', '==', 'done').where('lUV', '==', 1.2).get().then((snapshot) => {
-    snapshot.forEach(doc => {
-        console.log(doc.id, '=>', doc.data());
-    });
+admin.firestore().collection('USERS').where('cS', '==', 'done').where('lUV', '==', 1.2).get().then(function userFilter(snapshot) {
+    console.log(`Fetched ${snapshot.size} users`)
+    snapshot.forEach((doc) => {
+        let userDataLoc = `${dataLoc}/${doc.id}`
+        let metaDataJSON = `${userDataLoc}/metadata.json`
+        if (!fs.existsSync(userDataLoc)){
+            fs.mkdirSync(userDataLoc);
+        }
+        let userData = doc.data();
+        let metaData = {
+            'id': doc.id,
+            'date': userData['cSD']
+        }
+        let dataPromises = [
+            admin.firestore().collection('METADATA').doc(doc.id).get(),
+            admin.firestore().collection('HEALTH_DATA').doc(doc.id).get()
+        ]
+        Promise.all(dataPromises).then((promiseData) => {
+            promiseData.forEach((metaDataSnapshot) => {
+                if (metaDataSnapshot.exists) {
+                    metaData = Object.assign(metaData, metaDataSnapshot.data())
+                }
+            })
+            fs.writeFileSync(metaDataJSON, JSON.stringify(metaData));
+        })
+    })
 })
