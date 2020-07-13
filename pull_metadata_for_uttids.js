@@ -2,13 +2,13 @@ const fs = require('fs');
 const admin = require("firebase-admin");
 
 admin.initializeApp({
-  credential: admin.credential.cert("../others/serviceAccountKey.json"),
+  credential: admin.credential.cert("../serviceAccountKey.json"),
   databaseURL: "https://project-coswara.firebaseio.com"
 })
 
 const db = admin.firestore();
 const dateString = '2020-04-13'
-const outputDir = `../data/metadata/${dateString}`
+const outputDir = `../to_upload/${dateString}`
 if (!fs.existsSync(outputDir)){
   fs.mkdirSync(outputDir);
 }
