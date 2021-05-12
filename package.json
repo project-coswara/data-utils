@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/firestore": "^3.7.4",
-    "@grpc/grpc-js": "^0.8.1",
+    "@grpc/grpc-js": "^1.1.8",
     "firebase": "^7.14.1",
     "firebase-admin": "^8.10.0"
   },
